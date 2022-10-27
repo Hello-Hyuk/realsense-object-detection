@@ -1,0 +1,2 @@
+set(realsense2_camera_MESSAGE_FILES "/home/jay/Dev/realsense-object-detection/wego_ws/src/realsense-ros/realsense2_camera/msg/IMUInfo.msg;/home/jay/Dev/realsense-object-detection/wego_ws/src/realsense-ros/realsense2_camera/msg/Extrinsics.msg;/home/jay/Dev/realsense-object-detection/wego_ws/src/realsense-ros/realsense2_camera/msg/Metadata.msg")
+set(realsense2_camera_SERVICE_FILES "/home/jay/Dev/realsense-object-detection/wego_ws/src/realsense-ros/realsense2_camera/srv/DeviceInfo.srv")
