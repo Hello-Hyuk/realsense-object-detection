@@ -8,4 +8,4 @@ docker run -it \
 --privileged \
 --name wego_detection \
 --gpus all \
-test_ros
+wego_detect

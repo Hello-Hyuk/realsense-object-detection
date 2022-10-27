@@ -1,1 +1,1 @@
-docker build -t test_ros .
+docker build -t wego_detect .
