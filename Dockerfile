@@ -98,7 +98,7 @@ RUN pip install pyrealsense2
 RUN sudo apt-get update && sudo apt-get upgrade
 
 # tensorrt
-RUN echo "/workspace/wego_ws/src/tensorrt_demos/tensorrt_make.sh" >> ~/.bashrc
+RUN echo "./src/tensorrt_demos/tensorrt_make.sh" >> ~/.bashrc
 
 RUN mkdir /workspace/wego_ws
 WORKDIR /workspace/wego_ws
