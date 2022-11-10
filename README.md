@@ -15,18 +15,16 @@ $ ./docker_build.sh
 
 
 ## init docker containor
-**Just do once when you clone this repo**
-
+**Just do it once**
 ```
 $ ./run.sh
+# catkin_make
+# source devel/setup.bash
 ```
 
 ### convert yolo weight to tensorrt
 ```
 # ./convert_weight.sh
-# cd /workspace/wego_ws
-# catkin_make
-# source devel/setup.bash
 ```
 
 ## Start
@@ -38,7 +36,7 @@ $ ./run.sh
 # ./cam_open.sh
 ```
 
-**second termianl (Yolo detection)**
+**second terminal (Yolo detection)**
 ```
 $ ./run_terminal.sh
 # ./object_detect.sh
