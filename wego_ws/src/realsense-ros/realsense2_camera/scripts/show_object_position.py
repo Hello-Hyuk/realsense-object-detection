@@ -1,21 +1,17 @@
-import rospy
-from sensor_msgs.msg import Image
-from sensor_msgs.msg import CameraInfo
 from cv_bridge import CvBridge, CvBridgeError
 import sys
 import os
 import numpy as np
+# ros
+import rospy
+# realsense
 import pyrealsense2 as rs2
-
+from sensor_msgs.msg import Image, CameraInfo
 # yolo 
-from vision_msgs.msg import Detection2D # for sending bouding box
 from vision_msgs.msg import Detection2DArray # for sending bounding box
-from vision_msgs.msg import BoundingBox2D # for sending bounding box
-from vision_msgs.msg import ObjectHypothesisWithPose # for sending bounding box
+# point info
 from geometry_msgs.msg import Point32
-from std_msgs.msg import Header
-from sensor_msgs.msg import PointCloud, PointCloud2, ChannelFloat32
-
+from sensor_msgs.msg import PointCloud
 
 if (not hasattr(rs2, 'intrinsics')):
     import pyrealsense2.pyrealsense2 as rs2
@@ -56,16 +52,17 @@ class ImageListener:
             # header
             # point
             obj_point = Point32()
-            obj_point.x = result[2]
-            obj_point.y = -result[0]
-            obj_point.z = -result[1]
+            obj_point.x = result[2] / 1000
+            obj_point.y = -result[0] / 1000
+            obj_point.z = -result[1] / 1000
             # point stamped
             obj_info = PointCloud()
             obj_info.header.stamp = rospy.Time.now()
             obj_info.header.frame_id = 'camera_link'
             obj_info.points.append(obj_point)
             print(obj_info)
-            self.detect_obj_info_pub.publish(obj_info)
+            if obj_point.x  != 0:
+                self.detect_obj_info_pub.publish(obj_info)
 
     def imageDepthCallback(self, data):
         try:
@@ -102,7 +99,7 @@ def main():
     depth_info_topic = '/camera/aligned_depth_to_color/camera_info'
     yolo_depth_image_topic = '/yolo_bbox'
     
-    listener = ImageListener(depth_image_topic, yolo_depth_image_topic, depth_info_topic)
+    ImageListener(depth_image_topic, yolo_depth_image_topic, depth_info_topic)
     rospy.spin()
 
 if __name__ == '__main__':
