@@ -1,5 +1,7 @@
 
-wego_ws/src/tensorrt_demos/yolo/
+wego_ws/src/tensorrt_demos/yolo/red_hand.trt
+
+wego_ws/src/tensorrt_demos/yolo/red_hand.onnx
 
 wego_ws/src/tensorrt_demos/utils/
 
