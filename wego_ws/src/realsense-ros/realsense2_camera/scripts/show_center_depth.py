@@ -17,8 +17,6 @@ from sensor_msgs.msg import Image
 if (not hasattr(rs2, 'intrinsics')):
     import pyrealsense2.pyrealsense2 as rs2
 
-pipeline = rs.pipeline()
-
 class ImageListener:
     def __init__(self, depth_image_topic, yolo_depth_image_topic, depth_info_topic):
         self.bridge = CvBridge()
@@ -35,32 +33,30 @@ class ImageListener:
         self.intrinsics = None
         self.pix = None
         self.pix_grade = None
-        self.norm_x = 840/1280
-        self.norm_y = 480/720
-        
         #bbox
         self.sub_bbox = rospy.Subscriber(yolo_depth_image_topic, Detection2DArray, self.bboxCallback)
-
+        self.left_x = 0
+        self.left_y = 0
+        self.right_x = 0
+        self.right_y = 0
+        self.center_x = 0
+        self.center_y = 0
+    
     def bboxCallback(self,data):
         for detection in enumerate(data.detections):
             if detection[0] == 0 :
-                self.center_x = int(detection[1].bbox.center.x * self.norm_x)
-                self.center_y = int(detection[1].bbox.center.y * self.norm_y)
-                self.left_x = int((self.center_x - (detection[1].bbox.size_x / 2.0)) * self.norm_x)
-                self.left_y = int((self.center_y - (detection[1].bbox.size_y / 2.0)) * self.norm_y)
-                self.right_x = int((self.center_x + (detection[1].bbox.size_x / 2.0)) * self.norm_x)
-                self.right_y = int((self.center_y + (detection[1].bbox.size_y / 2.0)) * self.norm_y)
+                self.center_x = int(detection[1].bbox.center.x)
+                self.center_y = int(detection[1].bbox.center.y)
+                self.left_x = self.center_x - (detection[1].bbox.size_x / 2.0)
+                self.left_y = self.center_y - (detection[1].bbox.size_y / 2.0)
+                self.right_x = self.center_x + (detection[1].bbox.size_x / 2.0)
+                self.right_y = self.center_y + (detection[1].bbox.size_y / 2.0)
                 # pick depth from center pixel of bounding box:
-
-        align = rs.align(rs.stream.color)
-        aligned_frames = align.proccess(depth_and_color_frameset)
-        color_frame = aligned_frames.first(rs.stream.color)
-        aligned_depth_frame = aligned_frames.get_depth_frame()
-
+        print(self.center_y,self.center_x)
         indices = np.array(np.where(self.depth_img == self.depth_img[self.center_y][self.center_x]))[:,0]
         #indices = np.array(np.where(self.depth_img == self.depth_img[self.depth_img > 0].min()))[:,0]
         raw = np.array(np.where(self.depth_img == self.depth_img[self.depth_img > 0].min()))
-        #print("raw indicese : ",raw, raw.shape)
+        print("raw indicese : ",raw, raw.shape)
         # indices = np.array(np.where(cv_image == cv_image[cv_image > 0].min()))[:,0]
         pix = (indices[1], indices[0])
         self.pix = pix
@@ -79,7 +75,6 @@ class ImageListener:
             line += '\r'
             sys.stdout.write(line)
             sys.stdout.flush()
-            print("box center pixel : ",self.center_x,self.center_y)
             # publisher
             obj_info = Detection2D()
             obj_info.bbox.center.x = pix[0]
