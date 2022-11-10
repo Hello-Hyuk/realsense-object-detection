@@ -88,17 +88,7 @@ def loop_and_detect(image, bbox_pub=None, img_pub=None):
     idx = int()
     box_size = float()
     box_arr = []
-
-    ######### img publish 
-    img_msg = Image()
-    img_msg.height = rst.shape[0]
-    img_msg.width = rst.shape[1]
-    img_msg.encoding = "bgr8"
-    img_msg.is_bigendian = 0
-    img_msg.data = rst.tostring()
-    img_msg.step = 1920
-    #########
-
+    
     for i in range(len(boxes)):
         detection = Detection2D()
         obj_info = ObjectHypothesisWithPose()
@@ -108,7 +98,7 @@ def loop_and_detect(image, bbox_pub=None, img_pub=None):
         detection.bbox.center.x = boxes[i][0] + (boxes[i][2] - boxes[i][0])/2 # get bounding center x
         detection.bbox.center.y = boxes[i][1] + (boxes[i][3] - boxes[i][1])/2 # get bounding cetner y
         detection.bbox.center.theta = 0.0
-            
+        print(detection.bbox.center.x, detection.bbox.center.y, img.shape)
         detection.bbox.size_x = abs(boxes[i][0] - boxes[i][2]) # get bounding x size
         detection.bbox.size_y = abs(boxes[i][1] - boxes[i][3]) # get bounding y size
             
@@ -130,7 +120,7 @@ def loop_and_detect(image, bbox_pub=None, img_pub=None):
         detection.results.append(obj_info)
         detection2d.detections.insert(idx, detection)
         
-    img_pub.publish(img_msg) # send msg confidence
+    img_pub.publish(CV_BRIDGE.cv2_to_imgmsg(rst, "bgr8"))# 
     bbox_pub.publish(detection2d) # send msg bounding box
     r.sleep() # to downgrade FPS
 
@@ -166,7 +156,7 @@ def main(realsense_img):
 if __name__ == '__main__':
     args = parse_args()
     trt_yolo = TrtYOLO(args.model, args.category_num, args.letter_box, cuda_ctx=pycuda.autoinit.context)
-    conf_th = 0.85
+    conf_th = 0.95
     cls_dict = get_cls_dict(args.category_num)
     vis = BBoxVisualization(cls_dict)
     realsense_img = '/camera/color/image_raw'
