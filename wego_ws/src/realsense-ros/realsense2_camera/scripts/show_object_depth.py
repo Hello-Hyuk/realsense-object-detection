@@ -1,5 +1,5 @@
 import rospy
-from sensor_msgs.msg import Image as msg_Image
+from sensor_msgs.msg import Image
 from sensor_msgs.msg import CameraInfo
 from cv_bridge import CvBridge, CvBridgeError
 import sys
@@ -12,7 +12,10 @@ from vision_msgs.msg import Detection2D # for sending bouding box
 from vision_msgs.msg import Detection2DArray # for sending bounding box
 from vision_msgs.msg import BoundingBox2D # for sending bounding box
 from vision_msgs.msg import ObjectHypothesisWithPose # for sending bounding box
-from sensor_msgs.msg import Image
+from geometry_msgs.msg import Point32
+from std_msgs.msg import Header
+from sensor_msgs.msg import PointCloud, PointCloud2, ChannelFloat32
+
 
 if (not hasattr(rs2, 'intrinsics')):
     import pyrealsense2.pyrealsense2 as rs2
@@ -23,50 +26,45 @@ class ImageListener:
         #subscriber
         self.sub = rospy.Subscriber(depth_image_topic, Image, self.imageDepthCallback)
         self.sub_info = rospy.Subscriber(depth_info_topic, CameraInfo, self.imageDepthInfoCallback)
-        confidence_topic = depth_image_topic.replace('depth', 'confidence')
-        self.sub_conf = rospy.Subscriber(confidence_topic, msg_Image, self.confidenceCallback)
+        self.sub_bbox = rospy.Subscriber(yolo_depth_image_topic, Detection2DArray, self.bboxCallback)
         #publisher
-        self.detect_obj_info_pub = rospy.Publisher('/yolo_obj_info', Detection2D)
+        self.detect_obj_info_pub = rospy.Publisher('/yolo_obj_info', PointCloud)
         self.rate = rospy.Rate(20)
         # depth image
         self.depth_img = None
         self.intrinsics = None
-        self.pix = None
-        self.pix_grade = None
-        #bbox
-        self.sub_bbox = rospy.Subscriber(yolo_depth_image_topic, Detection2DArray, self.bboxCallback)
-        self.left_x = 0
-        self.left_y = 0
-        self.right_x = 0
-        self.right_y = 0
-        self.center_x = 0
-        self.center_y = 0
-
+        # bbox info
+        self.center_x = None
+        self.center_y = None
+        
     
     def bboxCallback(self,data):
         for detection in enumerate(data.detections):
             if detection[0] == 0 :
                 self.center_x = int(detection[1].bbox.center.x)
                 self.center_y = int(detection[1].bbox.center.y)
-                self.left_x = self.center_x - (detection[1].bbox.size_x / 2.0)
-                self.left_y = self.center_y - (detection[1].bbox.size_y / 2.0)
-                self.right_x = self.center_x + (detection[1].bbox.size_x / 2.0)
-                self.right_y = self.center_y + (detection[1].bbox.size_y / 2.0)
-                # pick depth from center pixel of bounding box:
-        
+                
+        # pick depth from center pixel of bounding box:
         if not data.detections :
             print("nothing detected \n")
         else :
             self.depth = self.depth_img_np[self.center_y,self.center_x]
             if self.intrinsics:
                 result = rs2.rs2_deproject_pixel_to_point(self.intrinsics, [self.center_x, self.center_y], self.depth)
-                print(f"result : {result}")
     
             # publisher
-            obj_info = Detection2D()
-            obj_info.bbox.center.x = self.center_x
-            obj_info.bbox.center.y = self.center_y
-            obj_info.bbox.center.theta = self.depth
+            # header
+            # point
+            obj_point = Point32()
+            obj_point.x = result[2]
+            obj_point.y = -result[0]
+            obj_point.z = -result[1]
+            # point stamped
+            obj_info = PointCloud()
+            obj_info.header.stamp = rospy.Time.now()
+            obj_info.header.frame_id = 'camera_link'
+            obj_info.points.append(obj_point)
+            print(obj_info)
             self.detect_obj_info_pub.publish(obj_info)
 
     def imageDepthCallback(self, data):
@@ -78,16 +76,6 @@ class ImageListener:
         except ValueError as e:
             return
         self.depth_img_np = np.array(self.depth_img, dtype=np.float32)
-
-    def confidenceCallback(self, data):
-        try:
-            cv_image = self.bridge.imgmsg_to_cv2(data, data.encoding)
-            grades = np.bitwise_and(cv_image >> 4, 0x0f)
-            if (self.pix):
-                self.pix_grade = grades[self.pix[1], self.pix[0]]
-        except CvBridgeError as e:
-            print(e)
-            return
 
     def imageDepthInfoCallback(self, cameraInfo):
         try:

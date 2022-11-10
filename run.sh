@@ -8,4 +8,4 @@ docker run -it \
 --privileged \
 --name wego_detection \
 --gpus all \
-wego_detect
+cjh2626002/wego_realsense
