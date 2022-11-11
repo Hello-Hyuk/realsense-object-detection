@@ -1,6 +1,9 @@
 # realsense-object-detection
 
 ## Prerequisite
+Object
+- Red hand stick
+
 H/W 
 - realsense camera 
 
@@ -51,11 +54,7 @@ $ ./get_object_position.sh
 
 open terminal and execute rviz 
 ```
-$ rviz
-```
-open rviz config file
-```
-file -> open config -> realsense/wego_ws/src/rviz/red_hand.rviz
+$ rosrun rviz rviz -d wego_ws/src/rviz/red_hand.rviz 
 ```
 ## Exit
 
