@@ -8,5 +8,5 @@ docker run -it \
 --privileged \
 --name wego_detection \
 --gpus all \
-cjh2626002/wego_realsense \
-/workspace/wego_ws/convert_weight.sh
+wego_realsense \
+/workspace/wego_ws/shell/init.sh
