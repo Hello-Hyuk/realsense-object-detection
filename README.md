@@ -57,7 +57,9 @@ open rviz config file
 ```
 file -> open config -> realsense/wego_ws/src/rviz/red_hand.rviz
 ```
+## Exit
 
+ctrl+c on first terminal
 
 
 
