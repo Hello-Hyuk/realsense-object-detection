@@ -34,7 +34,9 @@ $ ./init_run.sh
 ```
 
 ## Start
-open 3 terminal in local in realsense-object-detection direcory
+```
+$ ./run.sh
+```
 
 **first terminal (open realsense camera)** 
 ```
@@ -50,16 +52,16 @@ $ ./object_detect.sh
 ```
 $ ./get_object_position.sh
 ```
-## display
 
+## display
 open terminal and execute rviz 
 ```
 $ rosrun rviz rviz -d wego_ws/src/rviz/red_hand.rviz 
 ```
 ## Exit
-
-ctrl+c on first terminal
-
+```
+$ ./stop.sh
+```
 
 
 
