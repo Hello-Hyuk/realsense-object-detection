@@ -34,6 +34,7 @@ $ ./init_run.sh
 ```
 
 ## Start
+자동으로 아래의 3개의 터미널이 생성되며 sh파일이 실행됨
 ```
 $ ./run.sh
 ```
@@ -56,7 +57,7 @@ $ ./get_object_position.sh
 ## display
 open terminal and execute rviz 
 ```
-$ rosrun rviz rviz -d wego_ws/src/rviz/red_hand.rviz 
+$ rosrun rviz rviz -d ~/wego_ws/src/rviz/red_hand.rviz 
 ```
 ## Exit
 ```
